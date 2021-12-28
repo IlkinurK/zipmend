@@ -146,7 +146,7 @@
                 <v-btn  
                 color="#E72A50"
                 class="send"
-                dark
+                :disabled="!formIsValid"
                 type="submit"
                 >Book transport</v-btn>
                 <v-spacer></v-spacer>
@@ -202,8 +202,41 @@ import Swal from "sweetalert2"
           return {zipCode:item.zipCode, name:item.name};
       },
       book(){
-        if(this.formIsValid){
-          axios.post('https://interview.develop.zipmend.com/api/v3/price',
+
+        Swal.fire(
+          'Success!',
+          'Your transport was booked.',
+          'success'
+        )
+
+      }
+    },
+    created(){
+        this.countries = this.$store.getters.getCountries
+        this.atcountries = this.$store.getters.getAtCountries
+
+    },
+    computed : {   
+      formIsValid(){
+        this.vatrate = ''
+        this.total = ''
+        this.exctotal = ''
+        if(this.loadcombo && this.SLpostcode==''){
+          return false
+        }
+        if(!this.loadcombo){
+          if(this.Lcity=='' || this.Lpostcode=='')
+            return false
+        }
+        if(this.loadcomboU && this.SUpostcode==''){
+          return false
+        }
+        if(!this.loadcomboU){
+          if(this.Ucity=='' || this.Upostcode=='')
+            return false
+        }
+
+        axios.post('https://interview.develop.zipmend.com/api/v3/price',
           {
             "token":"tb7iVecOI1XQcj58346jN2bQJ8MrDG7YXwr4NXvS",
              "addresses": [
@@ -234,52 +267,27 @@ import Swal from "sweetalert2"
                 )
               }
             })
-        }
-        else{
-          Swal.fire(
-              'Fill all inputs',
-              '',
-              'info'
-          )
-        }
-
-      }
-    },
-    created(){
-        this.countries = this.$store.getters.getCountries
-        this.atcountries = this.$store.getters.getAtCountries
-
-    },
-    computed : {   
-      formIsValid(){
-        if(this.loadcombo && this.SLpostcode==''){
-          return false
-        }
-        if(!this.loadcombo){
-          if(this.Lcity=='' || this.Lpostcode=='')
-            return false
-        }
-        if(this.loadcomboU && this.SUpostcode==''){
-          return false
-        }
-        if(!this.loadcomboU){
-          if(this.Ucity=='' || this.Upostcode=='')
-            return false
-        }
 
         return true
 
       },
       loadcombo(){
-        if(this.atcountries.findIndex(c => c == this.SLcountry)>-1)
-        return true
+        if(this.atcountries.findIndex(c => c == this.SLcountry)>-1){
+          this.Lcity = ''
+          this.Lpostcode = ''
+          return true
 
+        }
+        this.SLpostcode = ''
         return false
       },
       loadcomboU(){
-        if(this.atcountries.findIndex(c => c == this.SUcountry)>-1)
-        return true
-
+        if(this.atcountries.findIndex(c => c == this.SUcountry)>-1){
+          this.Ucity = ''
+          this.Upostcode = ''
+          return true
+        }
+        this.SUpostcode = ''
         return false
       }
     },
